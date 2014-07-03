@@ -15,8 +15,8 @@ KeyEvent.SpecialKeys = {
 	del      : 8
 };
 KeyEvent.prototype = new Event();
-KeyEvent.prototype.char = "";
-KeyEvent.prototype.specialKey = KeyEvent.SpecialKeys.non;
+KeyEvent.prototype.key = "";
+KeyEvent.prototype.isSpecialKey = false;
 KeyEvent.prototype.modifier = {
 	ctrl : false,
 	meta : false,

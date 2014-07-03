@@ -35,7 +35,7 @@ Terminal.prototype.xPositionSaved = 0;
 Terminal.prototype.yPositionSaved = 0;
 Terminal.prototype.tickId;
 
-Terminal.prototype.staticNoShift = 4;
+Terminal.prototype.staticNoShift = 0;
 Terminal.prototype.color = "white";
 Terminal.prototype.backgroundColor = "black";
 Terminal.prototype.bold = false;
@@ -72,8 +72,8 @@ Terminal.prototype.getInputHTML = function() {
 	return code;
 }
 Terminal.prototype.init = function() {
-	window.onkeypress = this.handleKeyPress;
 	window.onkeydown = this.handleKeyDown;
+	window.onkeypress = this.handleKeyPress;
 	this.tickId = window.setInterval(this.tick, 10);
 	document.getElementById("input").focus();
 	this.cursorOn();
@@ -453,35 +453,41 @@ Terminal.prototype.output = function(text) {
 				var x = this.xPosition;
 				var y = this.yPosition;
 				var string = "";
-				for (var i = 0; i < this.xSize * (this.ySize - y - 1) + this.xSize - x; i++)
+				for (var j = 0; j < this.xSize * (this.ySize - j - 1) + this.xSize - x; j++)
 					string += " ";
 				this.normalOutput(string);
 				this.xPosition = x;
 				this.yPosition = y;
+				this.cursorOff();
+				this.cursorOn();
 				break;
 			case 1:
 				var x = this.xPosition;
 				var y = this.yPosition;
 				var string = "";
-				for (var i = 0; i < this.xSize * (y - 1) + x; i++)
+				for (var j = 0; j < this.xSize * (y - 1) + x; j++)
 					string += " ";
 				this.xPosition = 0;
 				this.yPosition = 0;
 				this.normalOutput(string);
 				this.xPosition = x;
 				this.yPosition = y;
+				this.cursorOff();
+				this.cursorOn();
 				break;
 			case 2:
 				var x = this.xPosition;
 				var y = this.yPosition;
 				var string = "";
-				for (var i = 0; i < this.xSize * this.ySize; i++)
+				for (var j = 0; j < this.xSize * this.ySize; j++)
 					string += " ";
 				this.xPosition = 0;
 				this.yPosition = 0;
 				this.normalOutput(string);
 				this.xPosition = x;
 				this.yPosition = y;
+				this.cursorOff();
+				this.cursorOn();
 				break;
 			default:
 				this.normalOutput("\033[" + param1 + tmp + param2 + text[i]);
@@ -505,31 +511,37 @@ Terminal.prototype.output = function(text) {
 				var x = this.xPosition;
 				var y = this.yPosition;
 				var string = "";
-				for (var i = 0; i < this.xSize - x; i++)
+				for (var j = 0; j < this.xSize - x - 1; j++)
 					string += " ";
 				this.normalOutput(string);
 				this.xPosition = x;
 				this.yPosition = y;
+				this.cursorOff();
+				this.cursorOn();
 				break;
 			case 1:
 				var x = this.xPosition;
 				var string = "";
-				for (var i = 0; i < x; i++)
+				for (var j = 0; j < x - 1; j++)
 					string += " ";
 				this.xPosition = 0;
 				this.normalOutput(string);
 				this.xPosition = x;
+				this.cursorOff();
+				this.cursorOn();
 				break;
 			case 2:
 				var x = this.xPosition;
 				var y = this.yPosition;
 				var string = "";
-				for (var i = 0; i < this.xSize; i++)
+				for (var j = 0; j < this.xSize - 1; j++)
 					string += " ";
 				this.xPosition = 0;
 				this.normalOutput(string);
 				this.xPosition = x;
 				this.yPosition = y;
+				this.cursorOff();
+				this.cursorOn();
 				break;
 			default:
 				this.normalOutput("\033[" + param1 + tmp + param2 + text[i]);
@@ -640,7 +652,64 @@ Terminal.prototype.output = function(text) {
 			break;
 		}
 	}
-	console.log(state);
 	if (tmp.length || param1.length || param2.length)
 		this.normalOutput("\033[" + param1 + tmp + param2);
+}
+Terminal.prototype.keyEvent = function(keyEvent) {
+}
+Terminal.prototype.handleKeyDown = function(e) {
+	var key = new KeyEvent();
+	key.isSpecialKey = true;
+	switch(e.keyIdentifier) {
+	/*case "Enter":
+		key.key = KeyEvent.SpecialKeys.enter;
+		break;*/
+	case "U+0008":
+		key.key = KeyEvent.SpecialKeys.backspace;
+		break;
+	case "Up":
+		key.key = KeyEvent.SpecialKeys.up;
+		break;
+	case "Down":
+		key.key = KeyEvent.SpecialKeys.down;
+		break;
+	case "Left":
+		key.key = KeyEvent.SpecialKeys.left;
+		break;
+	case "Right":
+		key.key = KeyEvent.SpecialKeys.right;
+		break;
+	case "U+001B":
+		key.key = KeyEvent.SpecialKeys.esc;
+		break;
+	case "U+007F":
+		key.key = KeyEvent.SpecialKeys.del;
+		break;
+	default:
+		return;
+	}
+	key.modifier = {
+		ctrl : e.ctrlKey,
+		meta : e.metaKey,
+		alt  : e.altKey,
+		altgr: e.altGraphKey
+	}
+	terminal.keyEvent(key);
+}
+Terminal.prototype.handleKeyPress = function(e) {
+	var key = new KeyEvent();
+	if (e.keyIdentifier == "Enter") {
+		key.isSpecialKey = true;
+		key.key = KeyEvent.SpecialKeys.enter;
+	} else {
+		key.isSpecialKey = false;
+		key.key = String.fromCharCode(e.which);
+	}
+	key.modifier = {
+		ctrl : e.ctrlKey,
+		meta : e.metaKey,
+		alt  : e.altKey,
+		altgr: e.altGraphKey
+	}
+	terminal.keyEvent(key);
 }
