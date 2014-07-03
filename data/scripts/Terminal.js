@@ -1,8 +1,8 @@
 const TERM_X_MIN = 60;
 const TERM_Y_MIN = 10;
 // the following 2 values are empirical determined in chromium
-const TERM_CELL_HEIGHT = 24; 
-const TERM_CELL_WIDTH  = 10;
+const TERM_CELL_HEIGHT = 16; 
+const TERM_CELL_WIDTH  = 8;
 
 const ANSI_NO   = 0;
 const ANSI_ESC  = 1;
@@ -22,6 +22,8 @@ const ANSI_EL   = 14;
 const ANSI_SCP  = 15;
 const ANSI_RCP  = 16;
 const ANSI_DECTCEM = 17;
+const ANSI_DSR  = 18;
+const ANSI_SGR  = 19;
 
 var Terminal = function() {
 }
@@ -80,11 +82,11 @@ Terminal.prototype.tick = function() {
 
 }
 Terminal.prototype.globalLineFeed = function() {
-	for (var i = this.staticNoShift; i < this.ySize; i++) {
+	for (var i = this.staticNoShift + 1; i < this.ySize; i++) {
 		for (var j = 0; j < this.xSize; j++) {
 			var to = document.getElementsByClassName((i - 1) + "c" + j)[0];
 			var from = document.getElementsByClassName(i + "c" + j)[0];
-			to.innerHTML = form.innerHTML;
+			to.innerHTML = from.innerHTML;
 			to.style.color = from.style.color;
 			to.style.fontWeight = from.style.fontWeight;
 			to.style.backgroundColor = from.style.backgroundColor;
@@ -162,7 +164,7 @@ Terminal.prototype.output = function(text) {
 			if (text[i] == "\033")
 				state = ANSI_ESC; // maybe a ANSI-sequence
 			else
-				this.normalOutputChar(text.charAt(i));
+				this.normalOutputChar(text[i]);
 			break;
 		case ANSI_ESC:
 			if (text[i] == "[")
@@ -184,10 +186,12 @@ Terminal.prototype.output = function(text) {
 			}			
 			if (param1.length > 0) {
 				state = ANSI_CSI3;
+				i--;
 				break;
 			}
 			if (text[i] == "?") {
 				state = ANSI_DECTCEM;
+				i--;
 				break;
 			}
 			if (text[i] == "s") {
@@ -257,6 +261,12 @@ Terminal.prototype.output = function(text) {
 				break;
 			case "K":
 				state = ANSI_EL;
+				break;
+			case "m":
+				state = ANSI_SGR;
+				break;
+			case "n":
+				state = ANSI_DSR;
 				break;
 			default:
 				state = ANSI_NO;
@@ -540,21 +550,97 @@ Terminal.prototype.output = function(text) {
 			this.yPosition = this.yPositionSaved;
 			break;
 		case ANSI_DECTCEM:
-			if (tmp.length < 3)
+			tmp += text[i];
+			if (tmp.length < 4)
 				break;
-			if (tmp == "25l") {
+			if (tmp == "?25l") {
 				this.displayCursor = false;
 				tmp = "";
 				state = ANSI_NO;
 			}
-			if (tmp == "25h") {
+			if (tmp == "?25h") {
 				this.displayCursor = true;
 				tmp = "";
 				state = ANSI_NO;
 			}
 			break;
+		case ANSI_SGR:
+			if (tmp != "") {
+				state = ANSI_NO;
+				this.normalOutput("\033[" + param1 + tmp + param2 + text[i]);
+				param1 = "";
+				param2 = "";
+				tmp = "";
+				break;
+			}
+			switch(param1) {
+			case "0":
+				this.color = "white";
+				this.backgroundColor = "black";
+				this.bold = false;
+				break;
+			case "1":
+				this.bold = true;
+				break;
+			case "30":
+				this.color = "black";
+				break;
+			case "31":
+				this.color = "red";
+				break;
+			case "32":
+				this.color = "green";
+				break;
+			case "33":
+				this.color = "yellow";
+				break;
+			case "34":
+				this.color = "blue";
+				break;
+			case "35":
+				this.color = "magenta";
+				break;
+			case "36":
+				this.color = "cyan";
+				break;
+			case "37":
+				this.color = "white";
+				break;
+			case "40":
+				this.backgroundColor = "black";
+				break;
+			case "41":
+				this.backgroundColor = "red";
+				break;
+			case "42":
+				this.backgroundColor = "green";
+				break;
+			case "43":
+				this.backgroundColor = "yellow";
+				break;
+			case "44":
+				this.backgroundColor = "blue";
+				break;
+			case "45":
+				this.backgroundColor = "magenta";
+				break;
+			case "46":
+				this.backgroundColor = "cyan";
+				break;
+			case "47":
+				this.backgroundColor = "white";
+				break;
+			default:
+				this.normalOutput("\033[" + param1 + tmp + param2 + text[i]);
+			}
+			state = ANSI_NO;
+			param1 = "";
+			param2 = "";
+			tmp = "";
+			break;
 		}
 	}
+	console.log(state);
 	if (tmp.length || param1.length || param2.length)
 		this.normalOutput("\033[" + param1 + tmp + param2);
 }
