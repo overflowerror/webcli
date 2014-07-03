@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<script>
+			// let's do some framebusting; we want this to be executed before the page loads
+			if (parent.frames.length > 0) {
+				top.location.replace(document.location);
+			}
+		</script>
+		<title>Webcli</title>
+		<link rel="stylesheet" type="text/css" href="data/styles/main.css">
+		<meta charset="UTF-8">
+		<script src="data/scripts/main.js"></script>
+		<script src="data/scripts/Terminal.js"></script>
+	</head>
+	<body>
+		<noscript>
+			<div class="error">
+				Error: This site needs JavaScript.
+			</div>
+		</noscript>
+	</body>
+</html>
