@@ -1,0 +1,48 @@
+@font-face { 
+	font-family: dejavu;
+	font-style: normal;
+	font-weight: normal;
+	src:url('../fonts/DejaVuSansMono.ttf') format('truetype');
+}
+
+body {
+	background-color: black;
+	color: white;
+	font-family: dejavu;
+}
+
+.error {
+	color: red;
+	border: solid 1px red;
+	position: absolute;	
+	padding: 10px 5px 10px 5px;
+}
+
+table {
+	border-collapse: seperate;
+	border-spacing: 0px 0px;
+	position: absolute;
+	top: 0px;
+	left: 0px;
+}
+table tr td {
+	font-size: 10px;
+	min-width: 6px;
+	max-width: 6px;
+	overflow: visible;
+	text-align: center;
+	height: 20px;
+	color: #fff;
+	font-family: dejavu;
+	border: 1px solid #000;
+}
+
+form {
+	display: none;
+	width: 1px;
+	height: 1px;
+	position: absolute;
+	left: -100px;
+	top: -100px;
+	overflow: hidden;
+}
