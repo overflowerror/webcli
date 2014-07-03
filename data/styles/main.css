@@ -27,11 +27,11 @@ table {
 }
 table tr td {
 	font-size: 10px;
-	min-width: 6px;
-	max-width: 6px;
+	min-width: 4px;
+	max-width: 4px;
 	overflow: visible;
 	text-align: center;
-	height: 20px;
+	height: 12px;
 	color: #fff;
 	font-family: dejavu;
 	border: 1px solid #000;
