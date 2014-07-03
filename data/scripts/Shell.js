@@ -10,6 +10,12 @@ Shell.prototype.prompt = "\033[36m\\t\033[0m \033[35m\\h\033[0m\033[1m:\033[0m\\
 Shell.prototype.user = "nobody";
 Shell.prototype.hostname = "webcli";
 Shell.prototype.directory = "/";
+
+Shell.prototype.input = "";
+Shell.prototype.inputPosition = 0;
+Shell.prototype.history = [];
+Shell.prototype.historyPosition = 0;
+
 Shell.prototype.centeredOutput = function(text) { // does not work for ansi.sequences
 	var line = "";
 	for (var i = 0; i < text.length; i++) {
@@ -54,7 +60,6 @@ Welcome to Webcli\n\
 }
 Shell.prototype.displayPrompt = function() {
 	var text = this.prompt;
-	console.dir(this);
 	while (text.indexOf("\\u") != -1)
 		text = text.replace("\\u", this.user);
 	while (text.indexOf("\\h") != -1)
@@ -65,6 +70,66 @@ Shell.prototype.displayPrompt = function() {
 		text = text.replace("\\t", new Date().getHours() + ":" + new Date().getMinutes());
 	while (text.indexOf("\\$") != -1)
 		text = text.replace("\\$", (this.user == "root" ? "#" : "$"));
-	this.output(text);
+	this.output("\033[2K\033[1G" + text + this.input + "\033[" + (this.input.length - this.inputPosition) + "D");
 }
-
+Shell.prototype.handleKey = function(keyEvent) {
+	if (keyEvent.isSpecialKey) {
+		var ke = KeyEvent.SpecialKeys;
+		switch(keyEvent.key) {
+		case ke.enter:
+			this.output("\n");
+			this.history.push(this.input);
+			this.historyPosition = this.history.length;
+			this.input = "";
+			this.inputPosition = 0;
+			this.exec();
+			break;
+		case ke.backspace:
+			if (this.inputPosition == 0)
+				break;
+			var tmp = this.input.split("");
+			tmp.splice(--this.inputPosition, 1);
+			this.input = tmp.join("");
+			this.displayPrompt();
+			break;
+		case ke.left:
+			if (this.inputPosition == 0)
+				break;
+			this.inputPosition--;
+			this.displayPrompt();
+			break;
+		case ke.right:
+			if (this.inputPosition == this.input.length)
+				break;
+			this.inputPosition++;
+			this.displayPrompt();
+			break;
+		case ke.up:
+			if (this.historyPosition == 0)
+				break;
+			this.input = this.history[--this.historyPosition];
+			this.inputPosition = this.input.length;
+			this.displayPrompt();
+			break;
+		case ke.down:
+			if (this.historyPosition == this.history.length)
+				break;
+			if (this.historyPosition == this.history.length - 1) {
+				this.input = "";
+				this.inputPosition = 0;
+				this.historyPosition = this.history.length;
+				this.displayPrompt();
+				break;
+			}
+			this.input = this.history[++this.historyPosition];
+			this.inputPosition = this.input.length;
+			this.displayPrompt();
+			break;
+		}
+	} else {
+		var tmp = this.input.split("");
+		tmp.splice(this.inputPosition++, 0, keyEvent.key);
+		this.input = tmp.join("");
+		this.displayPrompt();
+	}
+}
