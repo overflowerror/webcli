@@ -8,5 +8,8 @@ window.onload = function() {
 	shell.output = function(text) { 
 		window.terminal.output(text);
 	};
+	terminal.keyEvent = function (keyEvent) {
+		shell.handleKey(keyEvent);
+	};
 	shell.main([]);
 }
