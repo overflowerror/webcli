@@ -1,5 +1,5 @@
 <?php
-	$connection = mysql_connect("localhost", "webcli", "password");
-	mysql_select_db('webcli');
-	echo mysql_error();
+	$db = new mysqli("localhost", "webcli", "password", "webcli");
+	if ($db->connect_error)
+		die("Connect Error (" . $db->connect_errno . ") " . $db->connect_error);
 ?>
