@@ -2,8 +2,14 @@
 	die(); // comment for setup
 	
 
-	require("mysqlConnect.php");
+	require_once("mysqlConnect.php");
 
+	if ($db->query("SET SESSION sql_mode='NO_AUTO_VALUE_ON_ZERO'") !== true)
+		echo "seting mode <span style=\"color: red\">failed</span>.<br />";
+	else
+		echo "seting mode... success<br />";
+
+	echo "<br />";
 	echo "Droping all tables... ";
 
 	if ($db->query("DROP TABLE IF EXISTS `commentBlocks`, `comments`, `files`, `fileTypes`, 
@@ -35,6 +41,10 @@
 		) ENGINE=InnoDB DEFAULT CHARSET=latin1 AUTO_INCREMENT=1") !== true)
 		echo ("<span style=\"color: red\">not</span> ");
 	echo "created successfully. <br />";
+
+	/* Permission-bits:
+	 * x = 0, w = 1, r = 2
+	 */
 
 	echo "Table `files` ";
 	if ($db->query("CREATE TABLE IF NOT EXISTS `files` (
@@ -130,7 +140,8 @@
 		  `name` text CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
 		  `groupFK` int(11) NOT NULL,
 		  `needLogin` tinyint(1) NOT NULL DEFAULT '1',
-		  `password` text CHARACTER SET utf8 COLLATE utf8_bin NOT NULL
+		  `password` text CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+		  `homeFK` int(11) NOT NULL
 		) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=4") !== true)
 		echo ("<span style=\"color: red\">not</span> ");
 	echo "created successfully. <br />";
@@ -156,10 +167,19 @@
 	echo "populated. <br />";
 
 	echo "Table `users` ";
-	if ($db->query("INSERT INTO `users` (`ID`, `name`, `groupFK`, `needLogin`, `password`) VALUES
-		(1, 'root', 1, 1, ''),
-		(2, 'admin', 2, 1, ''),
-		(3, 'nobody', 3, 0, '')") !== true)
+	if ($db->query("INSERT INTO `users` (`ID`, `name`, `groupFK`, `needLogin`, `password`, `homeFK`) VALUES
+		(1, 'root', 1, 1, '', 1),
+		(2, 'admin', 2, 1, '', 3),
+		(3, 'nobody', 3, 0, '', 2)") !== true)
+		echo ("<span style=\"color: red\">not</span> ");
+	echo "populated. <br />";
+
+	echo "Table `files` ";
+	if ($db->query("INSERT INTO `files` (`ID`, `name`, `parentFK`, `userFK`, `groupFK`, `fileTypeFK`, `rightsUser`, `rightsGroup`, `rightsOther`, `created`, `changed`) VALUES
+		(0, '',      0, 1, 1, 2, 7, 5, 5, " . time() . ", " . time() . "),
+		(1, 'root',  0, 1, 1, 2, 7, 0, 0, " . time() . ", " . time() . "),
+		(2, 'home',  0, 1, 1, 2, 7, 5, 5, " . time() . ", " . time() . "),
+		(3, 'admin', 2, 2, 2, 2, 7, 5, 5, " . time() . ", " . time() . ")") !== true)
 		echo ("<span style=\"color: red\">not</span> ");
 	echo "populated. <br />";
 
@@ -270,7 +290,7 @@
 
 	echo " ... `files`.`ID` ... ";
 	if ($db->query("ALTER TABLE `files`
-		MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT") !== true)
+		MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=4") !== true)
 		echo ("<span style=\"color: red\">fail</span><br />");
 	else 
 		echo "success<br />";
