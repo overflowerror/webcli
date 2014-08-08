@@ -1,8 +1,9 @@
 <?php
-	die(); // comment for setup
+	//die(); // comment for setup
 	
 
 	require_once("mysqlConnect.php");
+	require_once("config.php");
 
 	if ($db->query("SET SESSION sql_mode='NO_AUTO_VALUE_ON_ZERO'") !== true)
 		echo "seting mode <span style=\"color: red\">failed</span>.<br />";
@@ -26,7 +27,7 @@
 	echo "Table `commentBlocks` ";
 	if ($db->query("CREATE TABLE IF NOT EXISTS `commentBlocks` (
 		`ID` int(11) NOT NULL,
-		  `commentBlockFK` int(11) NOT NULL,
+		  `fileFK` int(11) NOT NULL,
 		  `welcomeMessage` text CHARACTER SET utf8 COLLATE utf8_bin NOT NULL
 		) ENGINE=InnoDB DEFAULT CHARSET=latin1 AUTO_INCREMENT=1") !== true)
 		echo ("<span style=\"color: red\">not</span> ");
@@ -36,6 +37,7 @@
 	if ($db->query("CREATE TABLE IF NOT EXISTS `comments` (
 		`ID` int(11) NOT NULL,
 		  `userFK` int(11) NOT NULL,
+		  `commentBlockFK` int(11) NOT NULL,
 		  `time` int(11) NOT NULL,
 		  `text` text CHARACTER SET utf8 COLLATE utf8_bin NOT NULL
 		) ENGINE=InnoDB DEFAULT CHARSET=latin1 AUTO_INCREMENT=1") !== true)
@@ -175,11 +177,14 @@
 	echo "populated. <br />";
 
 	echo "Table `files` ";
-	if ($db->query("INSERT INTO `files` (`ID`, `name`, `parentFK`, `userFK`, `groupFK`, `fileTypeFK`, `rightsUser`, `rightsGroup`, `rightsOther`, `created`, `changed`) VALUES
-		(0, '',      0, 1, 1, 2, 7, 5, 5, " . time() . ", " . time() . "),
-		(1, 'root',  0, 1, 1, 2, 7, 0, 0, " . time() . ", " . time() . "),
-		(2, 'home',  0, 1, 1, 2, 7, 5, 5, " . time() . ", " . time() . "),
-		(3, 'admin', 2, 2, 2, 2, 7, 5, 5, " . time() . ", " . time() . ")") !== true)
+	if ($db->query("INSERT INTO `files` (`ID`, `name`, `parentFK`, `userFK`, `groupFK`, `fileTypeFK`, `rightsUser`, `rightsGroup`, `rightsOther`, `created`, `changed`, `content`) VALUES
+		(0, '',         0, 1, 1, 2, 7, 5, 5, " . time() . ", " . time() . ", ''),
+		(1, 'root',     0, 1, 1, 2, 7, 0, 0, " . time() . ", " . time() . ", ''),
+		(2, 'home',     0, 1, 1, 2, 7, 5, 5, " . time() . ", " . time() . ", ''),
+		(3, 'admin',    2, 2, 2, 2, 7, 5, 5, " . time() . ", " . time() . ", ''),
+		(4, 'etc',      0, 1, 1, 2, 7, 5, 5, " . time() . ", " . time() . ", ''),
+		(5, 'hostname', 4, 1, 1, 1, 7, 5, 5, " . time() . ", " . time() . ", '" . DEFAULT_HOSTNAME . "')
+") !== true)
 		echo ("<span style=\"color: red\">not</span> ");
 	echo "populated. <br />";
 
