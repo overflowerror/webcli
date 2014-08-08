@@ -44,7 +44,22 @@
 		}
 		static public function getFileById($ID) {
 			global $db;
-			$result = $db->query("SELECT * FROM `files` WHERE `ID`=" . $ID);
+			$result = $db->query("SELECT 
+						`files`.`ID` 		AS `ID`, 
+						`files`.`parentFK` 	AS `parentFK`, 
+						`files`.`name`		AS `name`,
+						`files`.`userFK`	AS `userFK`,
+						`files`.`groupFK`	AS `groupFK`,
+						`files`.`rightsUser`	AS `rightsUser`,
+						`files`.`rightsGroup`	AS `rightsGroup`,
+						`files`.`rightsOther`	AS `rightsOther`,
+						`files`.`created`	AS `created`,
+						`files`.`changed`	AS `changed`,
+						`files`.`content`	AS `content`,
+						`fileTypes`.`name`	AS `fileType` 
+					FROM `files` 
+						INNER JOIN `fileTypes` ON `files`.`fileTypeFK`=`fileTypes`.`ID` 
+					WHERE `files`.`ID`=" . $ID);
 			if (!$result->num_rows)
 				throw new Exception("no such file or directory");
 			return $result->fetch_object();
@@ -60,6 +75,86 @@
 			}
 			$array = array_reverse($array);
 			return "/" . implode("/", $array);
+		}
+		static public function getFilesByParentId($ID) {
+			global $db;
+			$tmp = $db->query("SELECT 
+						`files`.`ID` 		AS `ID`, 
+						`files`.`parentFK` 	AS `parentFK`, 
+						`files`.`name`		AS `name`,
+						`files`.`userFK`	AS `userFK`,
+						`files`.`groupFK`	AS `groupFK`,
+						`files`.`rightsUser`	AS `rightsUser`,
+						`files`.`rightsGroup`	AS `rightsGroup`,
+						`files`.`rightsOther`	AS `rightsOther`,
+						`files`.`created`	AS `created`,
+						`files`.`changed`	AS `changed`,
+						`files`.`content`	AS `content`,
+						`fileTypes`.`name`	AS `fileType` 
+					FROM `files` 
+						INNER JOIN `fileTypes` ON `files`.`fileTypeFK`=`fileTypes`.`ID` 
+					WHERE `files`.`ID`!=0 
+						AND `files`.`parentFK`=" . $ID);
+			if (!$tmp->num_rows)
+				return array();
+			$result = array();
+			while ($res = $tmp->fetch_object())
+				$result[] = $res;
+			return $result;
+		}
+		static public function getPermissionStringByFile($file) {
+			$result = "";
+			switch($file->fileType) {
+			case "file":
+				$result .= "-";
+				break;
+			case "directory":
+				$result .= "d";
+				break;
+			case "commentBlock":
+				$result .= "c";
+				break;
+			default:
+				$result .= "?";
+				break;
+			}
+			if ($file->rightsUser & 1 << 2)
+				$result .= "r";
+			else
+				$result .= "-";
+			if ($file->rightsUser & 1 << 1)
+				$result .= "w";
+			else
+				$result .= "-";
+			if ($file->rightsUser & 1 << 0)
+				$result .= "x";
+			else
+				$result .= "-";
+			if ($file->rightsGroup & 1 << 2)
+				$result .= "r";
+			else
+				$result .= "-";
+			if ($file->rightsGroup & 1 << 1)
+				$result .= "w";
+			else
+				$result .= "-";
+			if ($file->rightsGroup & 1 << 0)
+				$result .= "x";
+			else
+				$result .= "-";
+			if ($file->rightsOther & 1 << 2)
+				$result .= "r";
+			else
+				$result .= "-";
+			if ($file->rightsOther & 1 << 1)
+				$result .= "w";
+			else
+				$result .= "-";
+			if ($file->rightsOther & 1 << 0)
+				$result .= "x";
+			else
+				$result .= "-";
+			return $result;
 		}
 	}
 ?>
