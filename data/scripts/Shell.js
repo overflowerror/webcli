@@ -7,8 +7,10 @@ var Shell = function() {
 }
 Shell.prototype = new Program();
 Shell.prototype.prompt = "\033[36m\\t\033[0m \033[35m\\h\033[0m\033[1m:\033[0m\\w \\$ ";
-Shell.prototype.user = "nobody";
-Shell.prototype.hostname = "webcli";
+Shell.prototype.username = "";
+Shell.prototype.uid = -1;
+Shell.prototype.hostname = "";
+Shell.prototype.home = "";
 Shell.prototype.directory = "/";
 
 Shell.prototype.input = "";
@@ -34,6 +36,15 @@ Shell.prototype.centeredOutput = function(text) { // does not work for ansi.sequ
 	this.output(line);
 }
 Shell.prototype.main = function(args) {
+	var init = new Request("backend/init.php");
+	var result = init.send(true, ret);
+	result = JSON.parse(result);
+	this.uid = result.uid;
+	this.username = result.username;
+	this.hostname = result.hostname;
+	this.home = result.home;
+	this.directory = result.home;
+
 	var text = "\
  \033[31m                           (     (     \n\
  (  (            (     (    \033[33m)\\\033[31m )  )\\ )  \n\
@@ -55,13 +66,13 @@ _(())\\_)()((_)((_)_  )\\___ \033[33m(_)\033[31m)  (_))   \n\
 	this.centeredOutput("\
 Welcome to Webcli\n\
 =================");
-	this.output("\n\n\033[0mYou are logged in as \"nobody\". Use `su` to change your user.\n\033[31mNo directory, logging in with HOME=/\033[0m\n\n");
+	this.output("\n\n\033[0mYou are logged in as \"" + this.username + "\". Use `su` to change your user.");
 	this.displayPrompt();
 }
 Shell.prototype.displayPrompt = function() {
 	var text = this.prompt;
 	while (text.indexOf("\\u") != -1)
-		text = text.replace("\\u", this.user);
+		text = text.replace("\\u", this.username);
 	while (text.indexOf("\\h") != -1)
 		text = text.replace("\\h", this.hostname);
 	while (text.indexOf("\\w") != -1)
@@ -69,7 +80,7 @@ Shell.prototype.displayPrompt = function() {
 	while (text.indexOf("\\t") != -1)
 		text = text.replace("\\t", new Date().getHours() + ":" + new Date().getMinutes());
 	while (text.indexOf("\\$") != -1)
-		text = text.replace("\\$", (this.user == "root" ? "#" : "$"));
+		text = text.replace("\\$", (this.uid == 1 ? "#" : "$"));
 	this.output("\033[2K\033[1G" + text + this.input + "\033[" + (this.input.length - this.inputPosition) + "D");
 }
 Shell.prototype.handleKey = function(keyEvent) {
