@@ -221,6 +221,7 @@ Terminal.prototype.output = function(text) {
 				break;
 			}
 			if (param2.length > 0) {
+				i--;
 				state = ANSI_CSI3;
 				break;
 			}
@@ -695,6 +696,7 @@ Terminal.prototype.handleKeyDown = function(e) {
 		altgr: e.altGraphKey
 	}
 	terminal.keyEvent(key);
+	return false;
 }
 Terminal.prototype.handleKeyPress = function(e) {
 	var key = new KeyEvent();
@@ -712,4 +714,5 @@ Terminal.prototype.handleKeyPress = function(e) {
 		altgr: e.altGraphKey
 	}
 	terminal.keyEvent(key);
+	return false;
 }
