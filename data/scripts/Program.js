@@ -13,6 +13,8 @@ Program.prototype.init = function() { // Do not overwrite
 }
 Program.prototype.main = function(args) {
 }
+Program.prototype.exit = function(code) {
+}
 Program.prototype.output = function(text) {
 }
 Program.prototype.keyHandler = function(keyEvent) {
