@@ -5,8 +5,13 @@ window.onload = function() {
 	terminal.init();
 
 	window.shell = new Shell();
+	shell.exit = function(code) {
+		console.log("shell killed with status code " + code);
+		console.log("restarting shell");
+		onload();
+	}
 	shell.output = function(text) { 
-		window.terminal.output(text);
+		terminal.output(text);
 	};
 	terminal.keyEvent = function (keyEvent) {
 		shell.handleKey(keyEvent);
