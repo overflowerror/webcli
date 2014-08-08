@@ -8,8 +8,8 @@ Request.prototype.type = "GET";
 Request.prototype.file = "";
 Request.prototype.data = "";
 Request.prototype.setData = function(array) {
-	for (var i = 0; i < array; i++) {
-		this.data += (this.data.length == 0 ? "" : "&") + encodeURIComponent(array[i]);
+	for (var i = 0; i < array.length; i++) {
+		this.data += (this.data.length == 0 ? "" : "&") + encodeURIComponent(array[i][0]) + "=" + encodeURIComponent(array[i][1]);
 	}
 }
 Request.prototype.send = function(synchron, after) {
