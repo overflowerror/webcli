@@ -17,6 +17,10 @@ var ret = function(value) {
 	return value;
 }
 
+function pad(n) {
+	return n < 10 ? '0' + n : n;
+}
+
 var isInteger = function(i) {
 	return (parseInt(i) + "" == i);
 }
