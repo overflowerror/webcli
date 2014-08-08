@@ -1,8 +1,3 @@
-ProgramManager.programs.push({
-	command: "sh",
-	code: Shell
-})
-
 var Shell = function() {
 }
 Shell.prototype = new Program();
@@ -17,6 +12,9 @@ Shell.prototype.input = "";
 Shell.prototype.inputPosition = 0;
 Shell.prototype.history = [];
 Shell.prototype.historyPosition = 0;
+
+Shell.prototype.program = undefined;
+Shell.prototype.lastExitCode = 0;
 
 Shell.prototype.centeredOutput = function(text) { // does not work for ansi.sequences
 	var line = "";
@@ -45,6 +43,8 @@ Shell.prototype.main = function(args) {
 	this.home = result.home;
 	this.directory = result.home;
 
+	this.output("\033[0m\033[2J\033[1;1H");
+
 	var text = "\
  \033[31m                           (     (     \n\
  (  (            (     (    \033[33m)\\\033[31m )  )\\ )  \n\
@@ -66,24 +66,29 @@ _(())\\_)()((_)((_)_  )\\___ \033[33m(_)\033[31m)  (_))   \n\
 	this.centeredOutput("\
 Welcome to Webcli\n\
 =================");
-	this.output("\n\n\033[0mYou are logged in as \"" + this.username + "\". Use `su` to change your user.");
+	this.output("\n\n\033[0mYou are logged in as \"" + this.username + "\". Use `su` to change your user.\n\n");
 	this.displayPrompt();
 }
 Shell.prototype.displayPrompt = function() {
 	var text = this.prompt;
 	while (text.indexOf("\\u") != -1)
 		text = text.replace("\\u", this.username);
+	while (text.indexOf("\\?") != -1)
+		text = text.replace("\\?", this.lastExitCode);
 	while (text.indexOf("\\h") != -1)
 		text = text.replace("\\h", this.hostname);
 	while (text.indexOf("\\w") != -1)
-		text = text.replace("\\w", this.directory);
+		text = text.replace("\\w", this.directory.indexOf(this.home) == 0 ? this.directory.replace(this.home, "~") : this.directory);
 	while (text.indexOf("\\t") != -1)
-		text = text.replace("\\t", new Date().getHours() + ":" + new Date().getMinutes());
+		text = text.replace("\\t", pad(new Date().getHours()) + ":" + pad(new Date().getMinutes()));
 	while (text.indexOf("\\$") != -1)
 		text = text.replace("\\$", (this.uid == 1 ? "#" : "$"));
 	this.output("\033[2K\033[1G" + text + this.input + "\033[" + (this.input.length - this.inputPosition) + "D");
 }
 Shell.prototype.handleKey = function(keyEvent) {
+	if (this.porgram) {
+		this.program.handleKey(keyEvent);
+	}
 	if (keyEvent.isSpecialKey) {
 		var ke = KeyEvent.SpecialKeys;
 		switch(keyEvent.key) {
@@ -91,8 +96,6 @@ Shell.prototype.handleKey = function(keyEvent) {
 			this.output("\n");
 			this.history.push(this.input);
 			this.historyPosition = this.history.length;
-			this.input = "";
-			this.inputPosition = 0;
 			this.exec();
 			break;
 		case ke.backspace:
@@ -136,6 +139,8 @@ Shell.prototype.handleKey = function(keyEvent) {
 			this.inputPosition = this.input.length;
 			this.displayPrompt();
 			break;
+		default:
+			break;
 		}
 	} else {
 		var tmp = this.input.split("");
@@ -144,3 +149,32 @@ Shell.prototype.handleKey = function(keyEvent) {
 		this.displayPrompt();
 	}
 }
+Shell.prototype.exec = function() {
+	var args = this.input.split(" ");
+	this.input = "";
+	this.inputPosition = 0;
+	for (var i = 0; i < ProgramManager.programs.length; i++) {
+		if (ProgramManager.programs[i].command == args[0]) {
+			this.program = new ProgramManager.programs[i].code();
+			this.program.init();
+			this.program.exit = function(code) {
+				shell.program = undefined;
+				shell.lastExitCode = code;
+				shell.displayPrompt();
+			}
+			this.program.output = function(text) {
+				shell.output(text);
+			}
+			this.program.main(args);
+			return;
+		}
+	}
+	this.output("\033[31msh: " + args[0] + ": command not found\033[0m\n");
+	this.lastExitCode = 127;
+	this.displayPrompt();
+}
+
+ProgramManager.programs.push({
+	command: "sh",
+	code: Shell
+})
