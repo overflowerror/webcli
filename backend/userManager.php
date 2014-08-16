@@ -39,7 +39,10 @@
 		}
 		static public function getIdByUsername ($username) {
 			global $db;
-			return $db->query("SELECT `ID` FROM `users` WHERE `name`='" . $db->real_escape_string($username) . "'")->fetch_object()->ID;
+			$result = $db->query("SELECT `ID` FROM `users` WHERE `name`='" . $db->real_escape_string($username) . "'");
+			if (!$result->num_rows)
+				throw new Exception("No entry for user " . $username);
+			return $result->fetch_object()->ID;
 		}
 		static public function getRightsOnFile($uid, $file) {
 			if ($uid == $file->userFK)
