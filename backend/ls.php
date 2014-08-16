@@ -13,7 +13,7 @@
 	} catch (Exception $e) {
 		$tmp = array();
 		$tmp['error'] = $e->getMessage();
-		return json_encode($tmp);
+		echo json_encode($tmp);
 		exit();
 	}
 	if ($tmp->fileType == "directory") {
@@ -22,16 +22,16 @@
 		else {
 			$tmp = array();
 			$tmp['error'] = "cannot open directory " + $path + ": Permission denied";
-			return json_encode($tmp);
+			echo json_encode($tmp);
 			exit();
 		}
 	} else {
-		if (userManager::getRightsOnFile($_SESSION['uid'], fileManager::getFileById($tmp->parentFK)) & 1<<2)
+		if (userManager::getRightsOnFile($_SESSION['uid'], fileManager::getFileById($tmp->parentFK)) & FILE_FLAG_READ)
 			$tmp = array($tmp);
 		else {
 			$tmp = array();
 			$tmp['error'] = "cannot open file " + $path + ": Permission denied";
-			return json_encode($tmp);
+			echo json_encode($tmp);
 			exit();
 		}
 	}
