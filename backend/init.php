@@ -10,5 +10,8 @@
 	$result['username'] = $user->name;
 	$result['home'] = fileManager::getPathById($user->homeFK);
 	$result['hostname'] = fileManager::getFileById(fileManager::getIdByPath("/etc/hostname"))->content;
+
+	actionLogger::init($_SESSION);	
+
 	echo json_encode($result);
 ?>
