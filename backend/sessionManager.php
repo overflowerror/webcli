@@ -1,10 +1,10 @@
 <?php
 	@session_start();
 	
+	//session_regenerate_id();
+
 	require_once("actionLogger.php");
 	require_once("config.php");
-
-	session_regenerate_id();
 
 	if (!isset($_SESSION['active']) || !$_SESSION['active']) {
 		$_SESSION['active'] = true;
