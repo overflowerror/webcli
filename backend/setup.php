@@ -14,7 +14,7 @@
 	echo "Droping all tables... ";
 
 	if ($db->query("DROP TABLE IF EXISTS `commentBlocks`, `comments`, `files`, `fileTypes`, 
-		`groupMemberships`, `groups`, `logCommands`, `logConnect`, `logLogins`, 
+		`groupMemberships`, `groups`, `logCommands`, `logConnect`, `logInits`, `logLogins`, 
 		`logSessions`, `users`") === true)
 		echo "success";
 	else
@@ -113,6 +113,16 @@
 		echo ("<span style=\"color: red\">not</span> ");
 	echo "created successfully. <br />";
 
+	echo "Table `logInits` ";
+	if ($db->query("CREATE TABLE IF NOT EXISTS `logInits` (
+		`ID` int(11) NOT NULL,
+		  `userFK` int(11) NOT NULL,
+		  `connectFK` int(11) NOT NULL,
+		  `time` int(11) NOT NULL
+		) ENGINE=InnoDB DEFAULT CHARSET=latin1 AUTO_INCREMENT=1") !== true)
+		echo ("<span style=\"color: red\">not</span> ");
+	echo "created successfully. <br />";
+
 	echo "Table `logLogins` ";
 	if ($db->query("CREATE TABLE IF NOT EXISTS `logLogins` (
 		`ID` int(11) NOT NULL,
@@ -170,7 +180,7 @@
 
 	echo "Table `users` ";
 	if ($db->query("INSERT INTO `users` (`ID`, `name`, `groupFK`, `needLogin`, `password`, `homeFK`) VALUES
-		(1, 'root', 1, 1, '', 1),
+		(1, 'root', 1, 1, '" . hash("sha256", hash("sha256", "toor")) . "', 1),
 		(2, 'admin', 2, 1, '', 3),
 		(3, 'nobody', 3, 0, '', 2)") !== true)
 		echo ("<span style=\"color: red\">not</span> ");
@@ -243,6 +253,13 @@
 
 	echo " ... `logConnect`.`ID` ... ";
 	if ($db->query("ALTER TABLE `logConnect`
+		 ADD PRIMARY KEY (`ID`);") !== true)
+		echo ("<span style=\"color: red\">fail</span><br />");
+	else 
+		echo "success<br />";
+
+	echo " ... `logInits`.`ID` ... ";
+	if ($db->query("ALTER TABLE `logInits`
 		 ADD PRIMARY KEY (`ID`);") !== true)
 		echo ("<span style=\"color: red\">fail</span><br />");
 	else 
@@ -330,6 +347,13 @@
 
 	echo " ... `logConnect`.`ID` ... ";
 	if ($db->query("ALTER TABLE `logConnect`
+		MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT") !== true)
+		echo ("<span style=\"color: red\">fail</span><br />");
+	else 
+		echo "success<br />";
+
+	echo " ... `logInits`.`ID` ... ";
+	if ($db->query("ALTER TABLE `logInits`
 		MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT") !== true)
 		echo ("<span style=\"color: red\">fail</span><br />");
 	else 
