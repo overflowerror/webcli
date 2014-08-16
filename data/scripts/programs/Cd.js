@@ -16,6 +16,7 @@ Cd.prototype.main = function(args) {
 	if (result.error) {
 		this.output("\033[31m" + args[0] + ": " + result.error + "\033[0m\n");
 		this.exit(1);
+		return;
 	}
 
 	shell.directory = result.path;
