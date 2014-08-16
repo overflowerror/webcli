@@ -35,5 +35,17 @@
 				return -1;
 			return $result->fetch_object()->ID;
 		}
+		static public function login($uid, $session, $success) {
+			global $db;
+			$db->query("INSERT INTO `logLogins` (`currentUserFK`, `newUserFK`, `connectFK`, `time`, `success`) VALUES (" . $session['uid'] . ", " . $uid . ", " . actionLogger::getConnectFK($session) . ", " . time() . ", " . $success . ")");
+		}
+		static public function command($session, $command) {
+			global $db;
+			$db->query("INSERT INTO `logCommands`(`time`, `connectFK`, `userFK`, `command`) VALUES (" . time() . ", " . actionLogger::getConnectFK($session) . ", " . $session['uid'] . ", '" . $db->real_escape_string($command) . "')");
+		}
+		static public function init($session) {
+			global $db;
+			$db->query("INSERT INTO `logInits`(`userFK`, `connectFK`, `time`) VALUES (" . $session['uid'] . ", " . actionLogger::getConnectFK($session) . ", " . time() . ")");
+		}
 	}
 ?>
