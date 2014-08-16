@@ -86,8 +86,9 @@ Shell.prototype.displayPrompt = function() {
 	this.output("\033[2K\033[1G" + text + this.input + "\033[" + (this.input.length - this.inputPosition) + "D");
 }
 Shell.prototype.handleKey = function(keyEvent) {
-	if (this.porgram) {
+	if (this.program) {
 		this.program.handleKey(keyEvent);
+		return;
 	}
 	if (keyEvent.isSpecialKey) {
 		var ke = KeyEvent.SpecialKeys;
@@ -150,6 +151,9 @@ Shell.prototype.handleKey = function(keyEvent) {
 	}
 }
 Shell.prototype.exec = function() {
+	var request = new Request("backend/command.php");
+	request.setData([["command", this.input]]);
+	request.send(false, ret);
 	var args = this.input.split(" ");
 	this.input = "";
 	this.inputPosition = 0;
