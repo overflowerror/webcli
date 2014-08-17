@@ -1,5 +1,6 @@
 <?php
 	define("BETA",			true);
+	define("ENABLE_SETUP",		false);
 
 	define("LOG_FILE",		"/var/www/websites/webcli/internal.log");
 	

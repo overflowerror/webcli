@@ -1,9 +1,9 @@
 <?php
-	//die(); // comment for setup
-	
-
 	require_once("mysqlConnect.php");
 	require_once("config.php");
+
+	if (!ENABLE_SETUP)
+		die("Setup disabled. Take a look at ./config.php");
 
 	if ($db->query("SET SESSION sql_mode='NO_AUTO_VALUE_ON_ZERO'") !== true)
 		echo "seting mode <span style=\"color: red\">failed</span>.<br />";
