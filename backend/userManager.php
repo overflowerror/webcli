@@ -45,6 +45,8 @@
 			return $result->fetch_object()->ID;
 		}
 		static public function getRightsOnFile($uid, $file) {
+			if ($uid == 0) 
+				return FILE_FLAG_READ | FILE_FLAG_WRITE | FILE_FLAG_EXECUTE;
 			if ($uid == $file->userFK)
 				return $file->rightsUser;
 			if (userManager::userIdHasGroupId($uid, $file->groupFK))

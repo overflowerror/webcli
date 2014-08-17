@@ -16,7 +16,7 @@
 		echo json_encode($tmp);
 		exit();
 	}
-	if (!$tmp->needLogin) {
+	if (!$tmp->needLogin || ($_SESSION['uid'] == 0)) {
 		$result['loggedIn'] = true;
 		$_SESSION['uid'] = $tmp->ID;
 		$result['username'] = $tmp->name;
