@@ -1,5 +1,6 @@
 <?php
 	require_once("mysqlConnect.php");
+	require_once("config.php");
 
 	class userManager {
 		static public function getUserById ($ID) {
